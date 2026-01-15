@@ -1,21 +1,65 @@
-import { Redirect } from 'expo-router';
-import { View } from 'react-native';
-import { useLifeStore } from '@/lib/state/life-store';
+import { View, Text, Pressable } from 'react-native';
+import { useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { supabase } from '@/lib/supabaseClient';
 
 export default function Index() {
-  const profile = useLifeStore((s) => s.profile);
-  const isOnboardingComplete = profile?.onboardingComplete ?? false;
+  const router = useRouter();
+  const [loading, setLoading] = useState<boolean>(true);
 
-  // Show empty view briefly to prevent navigation race conditions
-  // This gives the navigator time to fully initialize
-  if (typeof isOnboardingComplete !== 'boolean') {
-    return <View className="flex-1 bg-[#0D0D0D]" />;
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          router.replace('/home');
+        }
+      } catch (error) {
+        console.error('Auth check error:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkAuth();
+  }, []);
+
+  if (loading) {
+    return (
+      <View className="flex-1 bg-white items-center justify-center">
+        <Text className="text-lg">Loading...</Text>
+      </View>
+    );
   }
 
-  // Redirect based on auth status
-  if (isOnboardingComplete) {
-    return <Redirect href="/(tabs)" />;
-  }
+  return (
+    <View className="flex-1 bg-white items-center justify-center px-6">
+      <View className="w-full max-w-md">
+        <Text className="text-4xl font-bold text-gray-900 mb-2">
+          Welcome
+        </Text>
+        <Text className="text-lg text-gray-600 mb-12">
+          Get started with your account
+        </Text>
 
-  return <Redirect href="/auth" />;
+        <Pressable
+          onPress={() => router.push('/auth')}
+          className="bg-blue-600 rounded-xl py-4 mb-4 active:opacity-80"
+        >
+          <Text className="text-white text-center text-lg font-semibold">
+            Sign In
+          </Text>
+        </Pressable>
+
+        <Pressable
+          onPress={() => router.push('/auth?mode=signup')}
+          className="bg-gray-100 rounded-xl py-4 active:opacity-80"
+        >
+          <Text className="text-gray-900 text-center text-lg font-semibold">
+            Create Account
+          </Text>
+        </Pressable>
+      </View>
+    </View>
+  );
 }
