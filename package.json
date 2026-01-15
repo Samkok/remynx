@@ -2,6 +2,7 @@
   "name": "template-app-53",
   "version": "1.0.0",
   "main": "index.ts",
+  "packageManager": "bun@latest",
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
@@ -173,7 +174,11 @@
   "private": true,
   "overrides": {
     "react-native-css-interop": "0.1.22",
-    "react-native-reanimated": "3.17.4"
+    "react-native-reanimated": "3.17.4",
+    "lucide-react-native": {
+      "react": "19.0.0",
+      "react-native": "0.79.6"
+    }
   },
   "patchedDependencies": {
     "react-native@0.79.6": "patches/react-native@0.79.6.patch",
